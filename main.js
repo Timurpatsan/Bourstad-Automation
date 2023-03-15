@@ -34,9 +34,11 @@ function calculateBuyTransactionDetails() {
     let incomeTarget;
     let capitalGainTarget;
 
-    const investmentAmountInput = window.prompt("What percentage of your total portfolio should be invested on this stock? (Wrap the value in parentheses to specify an arbitrary amount of stock)");
+    const investmentAmountInput = window.prompt("What percentage of your portfolio do you want to invest in this stock? (Wrap the value in parentheses to specify an arbitrary number of shares, or in brackets to specify a dollar amount)");
     if (investmentAmountInput.indexOf("(") > -1) {
         stockAmount = parseInt(investmentAmountInput.split("(")[1].split(")")[0], 10);
+    } else if (investmentAmountInput.indexOf("[") > -1) {
+        stockAmount = Math.round(parseFloat(investmentAmountInput.split("[")[1].split("]")[0]) / getStockDetails().ask);
     } else {
         const targetInvestmentAmount = parseFloat(investmentAmountInput) / 100 * bourstadStartingAmount;
         stockAmount = Math.round(targetInvestmentAmount / getStockDetails().ask);
@@ -56,7 +58,7 @@ function calculateBuyTransactionDetails() {
         window.alert("Overdraft, be careful!");
     }
 
-    const investmentCategoryInput = window.prompt("Which categories apply to this stock?\n(L)iquid Assets, (B)onds, (U)tilities, (F)inancial Services, (C)onsumer Products, (I)ndustrial Products, (N)atural Resources\nInput only the first letter of each applicable category\n(Leave blank to set this field manually)").toUpperCase();
+    const investmentCategoryInput = window.prompt("Which categories apply to this stock?\n(L)iquid Assets, (B)onds, (U)tilities, (F)inancial Services, (C)onsumer Products, (I)ndustrial Products, (N)atural Resources\nInput only the first letter of each applicable category").toUpperCase();
     if (investmentCategoryInput.trim().length > 0) {
         if (investmentCategoryInput.indexOf("L") > -1) {
             categories.push("Liquid Assets");
@@ -104,9 +106,11 @@ function calculateSellTransactionDetails() {
     let incomeTarget;
     let capitalGainTarget;
 
-    const investmentAmountInput = window.prompt("What percentage of your held stock do you want to sell? (Wrap the value in parentheses to specify an arbitrary amount of stock)");
+    const investmentAmountInput = window.prompt("What percentage of your held stock do you want to sell? (Wrap the value in parentheses to specify an arbitrary number of shares, or in brackets to specify a dollar amount)");
     if (investmentAmountInput.indexOf("(") > -1) {
         stockAmount = parseInt(investmentAmountInput.split("(")[1].split(")")[0], 10);
+    } else if (investmentAmountInput.indexOf("[") > -1) {
+        stockAmount = Math.round(parseFloat(investmentAmountInput.split("[")[1].split("]")[0]) / getStockDetails().bid);
     } else {
         const targetInvestmentAmount = parseFloat(investmentAmountInput) / 100 * bourstadStartingAmount;
         stockAmount = Math.round(targetInvestmentAmount / getStockDetails().bid);
@@ -123,7 +127,7 @@ function calculateSellTransactionDetails() {
 
     newCashAmount = Math.round(getAccountDetails().cash + (stockAmount * getStockDetails().bid));
 
-    const investmentCategoryInput = window.prompt("Which categories apply to this stock?\n(L)iquid Assets, (B)onds, (U)tilities, (F)inancial Services, (C)onsumer Products, (I)ndustrial Products, (N)atural Resources\nInput only the first letter of each applicable category\n(Leave blank to set this field manually)").toUpperCase();
+    const investmentCategoryInput = window.prompt("Which categories apply to this stock?\n(L)iquid Assets, (B)onds, (U)tilities, (F)inancial Services, (C)onsumer Products, (I)ndustrial Products, (N)atural Resources\nInput only the first letter of each applicable category").toUpperCase();
     if (investmentCategoryInput.trim().length > 0) {
         if (investmentCategoryInput.indexOf("L") > -1) {
             categories.push("Liquid Assets");
