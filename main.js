@@ -33,6 +33,7 @@ function calculateBuyTransactionDetails() {
     let categories = [];
     let incomeTarget;
     let capitalGainTarget;
+    let limitPrice;
 
     const investmentAmountInput = window.prompt("What percentage of your portfolio do you want to invest in this stock? (Wrap the value in parentheses to specify an arbitrary number of shares, or in brackets to specify a dollar amount)");
     if (investmentAmountInput.indexOf("(") > -1) {
@@ -87,13 +88,20 @@ function calculateBuyTransactionDetails() {
     capitalGainTarget = parseFloat(incomeTargetInput);
     incomeTarget = ((parseFloat(incomeTargetInput) / 100) * (capitalGainTarget / 100)) * 100;
 
+    if (document.getElementById("txt_cours_limite")) {
+        const limitPriceInput = window.prompt("At what limit price would you like to buy this stock?");
+        limitPrice = parseFloat(limitPriceInput);
+        newCashAmount = Math.round(getAccountDetails().cash - (stockAmount * limitPrice));
+    }
+
     return {
         "stock_amount": stockAmount,
         "new_stock_amount": newStockAmount,
         "new_cash_amount": newCashAmount,
         "categories": categories,
         "income_target": incomeTarget,
-        "capital_gain_target": capitalGainTarget
+        "capital_gain_target": capitalGainTarget,
+        "limit_price": limitPrice
     };
 }
 
@@ -105,6 +113,7 @@ function calculateSellTransactionDetails() {
     let categories = [];
     let incomeTarget;
     let capitalGainTarget;
+    let limitPrice;
 
     const investmentAmountInput = window.prompt("What percentage of your held stock do you want to sell? (Wrap the value in parentheses to specify an arbitrary number of shares, or in brackets to specify a dollar amount)");
     if (investmentAmountInput.indexOf("(") > -1) {
@@ -156,21 +165,30 @@ function calculateSellTransactionDetails() {
     capitalGainTarget = parseFloat(incomeTargetInput);
     incomeTarget = ((parseFloat(incomeTargetInput) / 100) * (capitalGainTarget / 100)) * 100;
 
+    if (document.getElementById("txt_cours_limite")) {
+        const limitPriceInput = window.prompt("At what limit price would you like to sell this stock?");
+        limitPrice = parseFloat(limitPriceInput);
+        newCashAmount = Math.round(getAccountDetails().cash + (stockAmount * limitPrice));
+    }
+
     return {
         "stock_amount": stockAmount,
         "new_stock_amount": newStockAmount,
         "new_cash_amount": newCashAmount,
         "categories": categories,
         "income_target": incomeTarget,
-        "capital_gain_target": capitalGainTarget
+        "capital_gain_target": capitalGainTarget,
+        "limit_price": limitPrice
     };
 }
 
 // Automatically fill in all input fields
 function autoFillBuyInputs() {
+    let displayPrice;
+
     const buyTransactionDetails = calculateBuyTransactionDetails();
     document.getElementById("quantitedeclare").value = buyTransactionDetails.stock_amount;
-    if (document.getElementById("txt_cours_limite")) document.getElementById("txt_cours_limite").value = parseFloat(window.prompt("What is the limit price at which you want to buy this stock?"));
+    if (document.getElementById("txt_cours_limite")) document.getElementById("txt_cours_limite").value = buyTransactionDetails.limit_price;
     document.getElementById("qte_apres").value = buyTransactionDetails.new_stock_amount;
     document.getElementById("solde_apres").value = buyTransactionDetails.new_cash_amount;
     if (buyTransactionDetails.categories.includes("Liquid Assets")) document.getElementsByName("ddl_liquidites")[0].value = 1;
@@ -183,16 +201,23 @@ function autoFillBuyInputs() {
     document.getElementById("objectif_revenu").value = buyTransactionDetails.income_target;
     document.getElementById("objectif_plusvalue").value = buyTransactionDetails.capital_gain_target;
     document.getElementById("quantitedeclare").focus(); // Refresh form
-    if (window.confirm(`You are about to buy ${buyTransactionDetails.stock_amount} shares at a price of ${getStockDetails().ask}$. Your cash balance will be of ${buyTransactionDetails.new_cash_amount}$ after the transaction.\nContinue?`)) {
+    if (document.getElementById("txt_cours_limite")) {
+        displayPrice = buyTransactionDetails.limit_price;
+    } else {
+        displayPrice = getStockDetails().ask;
+    }
+    if (window.confirm(`You are about to place an order to buy ${buyTransactionDetails.stock_amount} shares at a price of ${displayPrice}$. Your cash balance will be of ${buyTransactionDetails.new_cash_amount}$ after the transaction.\nContinue?`)) {
         document.querySelectorAll(`a[href="#next"]`)[0].click();
     }
 }
 
 // Automatically fill in all input fields
 function autoFillSellInputs() {
+    let displayPrice;
+
     const sellTransactionDetails = calculateSellTransactionDetails();
     document.getElementById("quantitedeclare").value = sellTransactionDetails.stock_amount;
-    if (document.getElementById("txt_cours_limite")) document.getElementById("txt_cours_limite").value = parseFloat(window.prompt("What is the limit price at which you want to sell this stock?"));
+    if (document.getElementById("txt_cours_limite")) document.getElementById("txt_cours_limite").value = sellTransactionDetails.limit_price;
     document.getElementById("qte_apres").value = sellTransactionDetails.new_stock_amount;
     document.getElementById("solde_apres").value = sellTransactionDetails.new_cash_amount;
     if (sellTransactionDetails.categories.includes("Liquid Assets")) document.getElementsByName("ddl_liquidites")[0].value = 1;
@@ -205,7 +230,12 @@ function autoFillSellInputs() {
     document.getElementById("objectif_revenu").value = sellTransactionDetails.income_target;
     document.getElementById("objectif_plusvalue").value = sellTransactionDetails.capital_gain_target;
     document.getElementById("quantitedeclare").focus(); // Refresh form
-    if (window.confirm(`You are about to sell ${sellTransactionDetails.stock_amount} shares at a price of ${getStockDetails().bid}$. Your cash balance will be of ${sellTransactionDetails.new_cash_amount}$ after the transaction.\nContinue?`)) {
+    if (document.getElementById("txt_cours_limite")) {
+        displayPrice = sellTransactionDetails.limit_price;
+    } else {
+        displayPrice = getStockDetails().bid;
+    }
+    if (window.confirm(`You are about to place an order to sell ${sellTransactionDetails.stock_amount} shares at a price of ${displayPrice}$. Your cash balance will be of ${sellTransactionDetails.new_cash_amount}$ after the transaction.\nContinue?`)) {
         document.querySelectorAll(`a[href="#next"]`)[0].click();
     }
 }
