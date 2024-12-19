@@ -1,4 +1,4 @@
-const bourstadStartingAmount = 200000;
+const bourstadStartingAmount = 800000;
 
 // Get all paragraph elements in info box and return the stats
 function getAccountDetails() {
